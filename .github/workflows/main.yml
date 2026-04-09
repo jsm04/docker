@@ -1,0 +1,40 @@
+name: CI Bun
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: tp4
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Run lint
+        run: bun run lint
+
+      - name: Start server
+        run: bun run dev &
+
+      - name: Wait for server
+        run: |
+          until curl -s http://localhost:3000/health; do
+            sleep 0.5
+          done
+
+      - name: Run tests
+        run: bun test
